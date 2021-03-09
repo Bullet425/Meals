@@ -1,31 +1,60 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
+import { useSelector } from "react-redux";
+
 import { CATEGORIES } from "../data/dummy-data";
 
-export const screenOptions = navData => {
-  headerTitle: navData.navigation.title;
-};
-
-const CategoryMealsScreen = props => {
+const CategoryMealsScreen = ({ navigation, route }) => {
   useEffect(() => {
-    props.navigation.setOptions({
-      title: selectedCategory.title,
+    navigation.setOptions({
+      headerTitle: selectedMeal.title,
     });
   });
 
-  const categoryId = props.route.params.categoryId;
+  const availableMeals = useSelector(state => state.meals.filteredMeals);
 
-  const selectedCategory = CATEGORIES.find(item => {
-    return item.id === categoryId;
-  });
+  const categoryId = route.params.categoryId;
+
+  const selectedMeal = CATEGORIES.find(category => category.id === categoryId);
+
+  const selectedCategory = availableMeals.filter(
+    meal => meal.categoryIds.indexOf(categoryId) >= 0
+  );
+
+  const mealDetails = data => {
+    navigation.navigate("details", { mealId: data.id });
+  };
+
+  const renderMeals = ({ item }) => {
+    return (
+      <TouchableOpacity onPress={() => mealDetails(item)}>
+        <View style={styles.screen}>
+          <Image
+            style={styles.foodImage}
+            source={{
+              uri: `${item.imageUrl}`,
+            }}
+          />
+          <View style={styles.textContainer}>
+            <Text style={styles.text}>{item.title}</Text>
+            <Text style={styles.text}>{item.price}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.screen}>
-      <Text>{selectedCategory.title}</Text>
-      <Button
-        title="Change Screen"
-        onPress={() => props.navigation.navigate("details")}
-      />
+      <FlatList data={selectedCategory} renderItem={renderMeals} />
     </View>
   );
 };
@@ -35,6 +64,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    margin: 15,
+  },
+  foodImage: {
+    height: 180,
+    width: Dimensions.get("window").width / 1.2,
+  },
+  textContainer: {
+    backgroundColor: "#000",
+    opacity: 0.9,
+    width: Dimensions.get("window").width / 1.2,
+    padding: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  text: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
 

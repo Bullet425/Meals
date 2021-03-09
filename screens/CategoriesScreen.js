@@ -3,31 +3,47 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   FlatList,
   TouchableOpacity,
 } from "react-native";
+import { HeaderButtons, Item } from "react-navigation-header-buttons";
+
 import { CATEGORIES } from "../data/dummy-data";
 import Colors from "../constants/Colors";
+import CustomHeaderButton from "../components/CustomHeaderButton";
 
-export const screenOptions = {
-  headerTitle: "Meal Categories",
-  headerStyle: {
-    backgroundColor: Colors.primary,
-  },
-  headerTintColor: "#000",
+export const screenOptions = navData => {
+  return {
+    headerTitle: "Meal Categories",
+    headerStyle: {
+      backgroundColor: Colors.primary,
+    },
+    headerTintColor: "#000",
+    headerLeft: () => (
+      <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
+        <Item
+          title="Menu"
+          iconName="ios-menu"
+          onPress={() => navData.navigation.toggleDrawer()}
+        />
+      </HeaderButtons>
+    ),
+  };
 };
 
-const CategoriesScreen = props => {
-  const renderGridItem = itemData => {
+const CategoriesScreen = ({ navigation }) => {
+  const renderGridItem = ({ item }) => {
     return (
       <TouchableOpacity
-        style={styles.gridItem}
-        onPress={() =>
-          props.navigation.navigate("meals", { categoryId: itemData.item.id })
-        }
+        style={{
+          ...styles.gridItem,
+          ...{ backgroundColor: item.color },
+        }}
+        onPress={() => navigation.navigate("meals", { categoryId: item.id })}
       >
-        <Text>{itemData.item.title}</Text>
+        <View style={styles.gridTexContainert}>
+          <Text style={styles.gridText}>{item.title}</Text>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -40,10 +56,20 @@ const CategoriesScreen = props => {
 const styles = StyleSheet.create({
   gridItem: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 15,
-    height: 100,
+    padding: 15,
+    margin: 10,
+    height: 150,
+    borderWidth: 2,
+    borderRadius: 10,
+  },
+  gridTexContainert: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+  },
+  gridText: {
+    fontSize: 16,
+    fontFamily: "noto",
   },
 });
 
